@@ -99,6 +99,7 @@ int connect_w_to(struct addrinfo *addr, time_t sec)
           if (getsockopt(soc, SOL_SOCKET, SO_ERROR, (void *)(&valopt), &lon) < 0)
           {
             fprintf(stderr, "Error in getsockopt() %d - %s\n", errno, strerror(errno));
+            close(soc);
             return -1;
           }
           // Check the value returned...
@@ -205,7 +206,8 @@ int read_varint(const int sfd)
     if (read_byte(sfd, &byte) == 0)
     {
       //fprintf(stderr, "Failed read varint: eof\n");
-      return (1);
+
+      return (-1);
     }
     value = byte & 0x7F;
     result |= value << (7 * numread);
@@ -215,7 +217,8 @@ int read_varint(const int sfd)
     if (numread > 5)
     {
       //fprintf(stderr, "Error reading varint: varint too big\n");
-      return (1);
+
+      return (-1);
     }
   } while ((byte & 0x80) != 0);
 
@@ -314,7 +317,7 @@ void ping_server(char *hostname, unsigned short port)
   if (rp == NULL)
   { /* No address succeeded */
     //fprintf(stderr, "Could not connect\n");
-    close(sfd);
+
     return;
   }
 
