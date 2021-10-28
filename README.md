@@ -2,7 +2,7 @@
 Open source re-creation of the copenheimer project.
 
 
-**Stage 1: Mostly complete - Make a extremely fast minecraft server scanner that does the handshakes**
+**Stage 1: Completed! - Make a extremely fast minecraft server scanner that does the handshakes**
 
 **Stage 2: Research started - Pump json output into postgres db**
 
