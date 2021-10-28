@@ -1,26 +1,29 @@
 #include <sys/types.h>
+
 #ifdef _WIN32
 #include <Winsock2.h>
 #include <Ws2tcpip.h>
 #else
-#include <sys/socket.h>
 #include <fcntl.h>
 #include <netdb.h>
+#include <sys/socket.h>
 #include <unistd.h>
 #endif
+
+#include <algorithm>
+#include <condition_variable>
+#include <errno.h>
+#include <fstream>
+#include <iostream>
+#include <iterator>
+#include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
 #include <string>
-#include <iostream>
 #include <thread>
-#include <iterator>
 #include <vector>
-#include <algorithm>
-#include <fstream>
-#include <sstream>
-#include <condition_variable>
+
 std::vector<std::thread> ThreadVector;
 
 #define HANDSHAKE_SIZE 1024
@@ -311,11 +314,13 @@ void ping_server(char *hostname, unsigned short port)
   if (rp == NULL)
   { /* No address succeeded */
     //fprintf(stderr, "Could not connect\n");
+    close(sfd);
     return;
   }
 
   if (set_timeout(sfd, TIMEOUT_SEC) == -1)
   {
+    close(sfd);
     return;
   }
 
@@ -325,12 +330,14 @@ void ping_server(char *hostname, unsigned short port)
   if (send(sfd, handshake, len, 0) != len)
   {
     //fprintf(stderr, "Failed to send handshake\n");
+    close(sfd);
     return;
   }
 
   if (send(sfd, request, 2, 0) != 2)
   {
     //fprintf(stderr, "Failed to send request\n");
+    close(sfd);
     return;
   }
 
@@ -338,11 +345,13 @@ void ping_server(char *hostname, unsigned short port)
   if (read_byte(sfd, &byte) == 0)
   { /* read packet id */
     //fprintf(stderr, "Failed to read\n");
+    close(sfd);
     return;
   }
   if (byte != 0)
   {
     //fprintf(stderr, "Unknown packet id\n");
+    close(sfd);
     return;
   }
 
@@ -356,6 +365,7 @@ void ping_server(char *hostname, unsigned short port)
     if (nread == -1)
     {
       //perror("json read");
+      close(sfd);
       return;
     }
 
@@ -365,6 +375,8 @@ void ping_server(char *hostname, unsigned short port)
 
     jsonStuff += readBuffer;
   }
+
+  close(sfd);
 
   cout << jsonStuff.c_str() << endl;
   return;
