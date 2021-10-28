@@ -41,7 +41,7 @@ using namespace std;
 std::condition_variable cv;
 std::mutex cv_m;
 
-int threads = 100;
+int threads = 500;
 std::ifstream myfile("masscan.txt");
 
 int connect_w_to(struct addrinfo *addr, time_t sec)
@@ -105,12 +105,14 @@ int connect_w_to(struct addrinfo *addr, time_t sec)
           // Check the value returned...
           if (valopt)
           {
+            close(soc);
             return -1;
           }
           break;
         }
         else
         {
+          close(soc);
           return -1;
         }
       } while (1);
@@ -142,6 +144,10 @@ int set_timeout(int sfd, time_t sec)
   struct timeval timeout;
   timeout.tv_sec = sec;
   timeout.tv_usec = 0;
+
+  int yes = 1;
+  setsockopt(
+      sfd, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(int));
 
   // Receive
   if (setsockopt(sfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) < 0)
