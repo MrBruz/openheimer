@@ -41,7 +41,7 @@ using namespace std;
 std::condition_variable cv;
 std::mutex cv_m;
 
-int threads = 500;
+int threads = 800;
 std::ifstream myfile("masscan.txt");
 
 int connect_w_to(struct addrinfo *addr, time_t sec)
@@ -233,7 +233,6 @@ int read_varint(const int sfd)
 
 void ping_server(char *hostname, unsigned short port)
 {
-  //cout << "C" << endl;
   int sfd, s, json_len;
   char string[STRING_BUF_SIZE];
   char port_str[6];
@@ -387,7 +386,10 @@ void ping_server(char *hostname, unsigned short port)
 
   close(sfd);
 
-  cout << jsonStuff.c_str() << endl;
+  if (jsonStuff.length() != 0)
+  {
+    cout << "> " << jsonStuff.c_str() << endl;
+  }
   return;
 }
 
